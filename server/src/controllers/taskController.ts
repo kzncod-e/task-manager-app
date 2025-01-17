@@ -50,7 +50,7 @@ export const createTask = async (req: Request, res: Response) => {
         priority,
         tags,
         startDate: new Date(startDate),
-        dueDate: new Date(dueDate),   
+        dueDate: new Date(dueDate),
         points,
         projectId,
         authorUserId,
@@ -64,6 +64,31 @@ export const createTask = async (req: Request, res: Response) => {
         message: "error while creating new task",
         error: error.message,
       });
+    }
+  }
+};
+
+export const updateTaskStatus = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const { taskId } = req.params;
+  const { status } = req.body;
+  try {
+    const updatedTasks = await prisma.task.update({
+      where: {
+        id: Number(taskId),
+      },
+      data: {
+        status: status,
+      },
+    });
+    res.status(200).json(updatedTasks);
+  } catch (error) {
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: "error while updating status tasks", error });
     }
   }
 };

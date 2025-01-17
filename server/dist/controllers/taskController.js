@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTask = exports.getAllTasks = void 0;
+exports.updateTaskStatus = exports.createTask = exports.getAllTasks = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getAllTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -65,3 +65,26 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.createTask = createTask;
+const updateTaskStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { taskId } = req.params;
+    const { status } = req.body;
+    try {
+        const updatedTasks = yield prisma.task.update({
+            where: {
+                id: Number(taskId),
+            },
+            data: {
+                status: status,
+            },
+        });
+        res.status(200).json(updatedTasks);
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res
+                .status(500)
+                .json({ message: "error while updating status tasks", error });
+        }
+    }
+});
+exports.updateTaskStatus = updateTaskStatus;
