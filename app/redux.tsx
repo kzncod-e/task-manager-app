@@ -24,19 +24,11 @@ import { PersistGate } from "redux-persist/integration/react";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 
 /* REDUX PERSISTENCE */
-const createNoopStorage = () => {
-  return {
-    getItem() {
-      return Promise.resolve(null);
-    },
-    setItem(value: unknown) {
-      return Promise.resolve(value);
-    },
-    removeItem() {
-      return Promise.resolve();
-    },
-  };
-};
+const createNoopStorage = () => ({
+  getItem: () => Promise.resolve(null),
+  setItem: () => Promise.resolve(),
+  removeItem: () => Promise.resolve(),
+});
 
 const storage =
   typeof window === "undefined"
@@ -46,7 +38,7 @@ const storage =
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["global"],
+  whitelist: ["global"], // Add `api.reducerPath` if needed
 };
 const rootReducer = combineReducers({
   global: globalReducer,
@@ -58,8 +50,8 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 export const makeStore = () => {
   return configureStore({
     reducer: persistedReducer,
-    middleware: (getDefault) =>
-      getDefault({
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
         serializableCheck: {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
         },
@@ -79,17 +71,17 @@ export default function StoreProvider({
   children,
 }: {
   children: React.ReactNode;
-}) {
+}): JSX.Element {
   const storeRef = useRef<AppStore>();
   if (!storeRef.current) {
     storeRef.current = makeStore();
-    setupListeners(storeRef.current.dispatch);
   }
   const persistor = persistStore(storeRef.current);
+  setupListeners(storeRef.current.dispatch);
 
   return (
     <Provider store={storeRef.current}>
-      <PersistGate loading={null} persistor={persistor}>
+      <PersistGate loading={<div>Loading...</div>} persistor={persistor}>
         {children}
       </PersistGate>
     </Provider>

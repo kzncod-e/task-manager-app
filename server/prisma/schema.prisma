@@ -61,7 +61,7 @@ model Task {
   description     String?
   status          String?
   priority        String?
-  tags            String?
+  tags            String[]
   startDate       DateTime?
   dueDate         DateTime?
   points          Int?
