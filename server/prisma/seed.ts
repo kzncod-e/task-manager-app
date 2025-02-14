@@ -3,21 +3,42 @@ import fs from "fs";
 import path from "path";
 const prisma = new PrismaClient();
 
-async function deleteAllData(orderedFileNames: string[]) {
-  const modelNames = orderedFileNames.map((fileName) => {
-    const modelName = path.basename(fileName, path.extname(fileName));
-    return modelName.charAt(0).toUpperCase() + modelName.slice(1);
-  });
+async function deleteAllData() {
+  // Delete dependent records first
+  await prisma.taskAssignment.deleteMany({});
+  await prisma.attachment.deleteMany({});
+  await prisma.comment.deleteMany({});
+  await prisma.task.deleteMany({});
+  await prisma.projectTeam.deleteMany({});
+  await prisma.user.deleteMany({});
+  await prisma.project.deleteMany({});
+  await prisma.team.deleteMany({});
 
-  for (const modelName of modelNames) {
-    const model: any = prisma[modelName as keyof typeof prisma];
-    try {
-      await model.deleteMany({});
-      console.log(`Cleared data from ${modelName}`);
-    } catch (error) {
-      console.error(`Error clearing data from ${modelName}:`, error);
-    }
-  }
+  // Reset primary keys (sequence) in PostgreSQL
+  await prisma.$executeRawUnsafe(
+    `ALTER SEQUENCE "User_userId_seq" RESTART WITH 1;`,
+  );
+  await prisma.$executeRawUnsafe(
+    `ALTER SEQUENCE "Team_id_seq" RESTART WITH 1;`,
+  );
+  await prisma.$executeRawUnsafe(
+    `ALTER SEQUENCE "Project_id_seq" RESTART WITH 1;`,
+  );
+  await prisma.$executeRawUnsafe(
+    `ALTER SEQUENCE "ProjectTeam_id_seq" RESTART WITH 1;`,
+  );
+  await prisma.$executeRawUnsafe(
+    `ALTER SEQUENCE "Task_id_seq" RESTART WITH 1;`,
+  );
+  await prisma.$executeRawUnsafe(
+    `ALTER SEQUENCE "TaskAssignment_id_seq" RESTART WITH 1;`,
+  );
+  await prisma.$executeRawUnsafe(
+    `ALTER SEQUENCE "Attachment_id_seq" RESTART WITH 1;`,
+  );
+  await prisma.$executeRawUnsafe(
+    `ALTER SEQUENCE "Comment_id_seq" RESTART WITH 1;`,
+  );
 }
 
 async function main() {
@@ -34,7 +55,7 @@ async function main() {
     "taskAssignment.json",
   ];
 
-  await deleteAllData(orderedFileNames);
+  await deleteAllData();
 
   for (const fileName of orderedFileNames) {
     const filePath = path.join(dataDirectory, fileName);

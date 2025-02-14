@@ -172,29 +172,47 @@ const Task = ({ task }: TaskProps) => {
       Low: "bg-blue-200 text-blue-700",
       default: "bg-gray-200 text-gray-700",
     };
-
-    <div
-      className={`rounded-full px-2 py-1 text-xs font-semibold ${priorityStyles[priority] || priorityStyles.default}`}
-    >
-      {priority}
-    </div>;
+    return (
+      <div
+        className={`rounded-full px-2 py-1 text-xs font-semibold ${priorityStyles[priority] || priorityStyles.default}`}
+      >
+        {priority}
+      </div>
+    );
   };
   return (
     <div
       ref={(instance) => {
         drag(instance);
       }}
-      className={`rounbded-md mb-4 bg-white shadow dark:bg-dark-secondary`}
+      className={`rounbded-md mb-4 bg-white shadow dark:bg-dark-secondary ${isDragging ? "opacity-50" : "opacity-100"}`}
     >
       {task.attachments && task.attachments.length > 0 && (
         <Image
-          src={`/public/${task.attachments[0].fileURL}`}
+          src={`/${task.attachments[0].fileURL}`}
           alt={task.attachments[0].fileName}
           width={400}
           height={200}
           className="h-auto w-full rounded-t-md"
         ></Image>
       )}
+      <div className="md:-6 p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex flex-1 flex-wrap items-center gap-2">
+            {task.priority && <PriorityTag priority={task.priority} />}
+            <div className="">
+              {taskTagsSplit.map((tag) => (
+                <div
+                  key={tag}
+                  className="rounded-full bg-blue-300 px-2 py-1 text-xs"
+                >
+                  {tag}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

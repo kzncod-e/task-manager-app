@@ -31,7 +31,7 @@ export interface User {
 
 export interface Attachment {
   id?: number;
-  fileURL: string;
+  fileUrl: string;
   fileName: string;
   taskId: number;
   uploadedById: number;
@@ -76,7 +76,7 @@ export const api = createApi({
       invalidatesTags: ["Projects"], // This invalidates the 'Projects' tag, causing any queries with this tag to re-fetch
     }),
     getTask: build.query<Task[], { projectId: number }>({
-      query: ({ projectId }) => `task?projectId=${projectId}`,
+      query: ({ projectId }) => `tasks?projectId=${projectId}`,
       providesTags: (result) =>
         //When a task is updated, RTK Query can ensure only the data for that specific task is re-fetched, not the entire task list.
         //is creating a tag object that RTK Query uses for caching, invalidation, and re-fetching purposes.
@@ -94,7 +94,7 @@ export const api = createApi({
     }),
     updateTaskStatus: build.mutation<Task, { taskId: number; status: string }>({
       query: ({ taskId, status }) => ({
-        url: `task/${taskId}/status`,
+        url: `tasks/${taskId}/status`,
         method: "PATCH",
         body: { status },
       }),
