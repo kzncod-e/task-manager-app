@@ -5,7 +5,7 @@ import React, { useEffect } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Task as TaskType } from "@/state/api";
-import { Ellipsis, Plus } from "lucide-react";
+import { Ellipsis, EllipsisVertical, Plus } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
 
@@ -196,11 +196,12 @@ const Task = ({ task }: TaskProps) => {
           className="h-auto w-full rounded-t-md"
         ></Image>
       )}
+      {/* priority and tags  */}
       <div className="md:-6 p-4">
         <div className="flex items-start justify-between">
           <div className="flex flex-1 flex-wrap items-center gap-2">
             {task.priority && <PriorityTag priority={task.priority} />}
-            <div className="">
+            <div className="flex gap-2">
               {taskTagsSplit.map((tag) => (
                 <div
                   key={tag}
@@ -211,8 +212,20 @@ const Task = ({ task }: TaskProps) => {
               ))}
             </div>
           </div>
+          <button className="flex h-6 w-4 flex-shrink-0 items-center justify-center dark:text-neutral-500">
+            <EllipsisVertical size={26} />
+          </button>
+        </div>
+        <div className="my-3 flex justify-between">
+          <h4 className="text-md font-bold dark:text-white">{task.title}</h4>
+          {typeof task.points === "number" && (
+            <div className="text-xs font-semibold dark:text-white">
+              {task.points} pts
+            </div>
+          )}
         </div>
       </div>
+      {/* end priority and tags */}
     </div>
   );
 };
