@@ -81,9 +81,10 @@ export default function StoreProvider({
 
   return (
     <Provider store={storeRef.current}>
-      <PersistGate loading={<div>Loading...</div>} persistor={persistor}>
-        {children}
-      </PersistGate>
+      {/* why we should use persistGate to remember what user do before refresh */}
+      {/* <PersistGate loading={<div>Loading...</div>} persistor={persistor}> */}
+      {children}
+      {/* </PersistGate> */}
     </Provider>
   );
 }

@@ -11,11 +11,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createProject = exports.getProjects = void 0;
 const client_1 = require("@prisma/client");
+const redis_1 = require("../lib/redis");
 //mirip kaya model
 const prisma = new client_1.PrismaClient();
 const getProjects = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const cacheKey = "projects";
+        const catchValue = yield redis_1.redis.get(cacheKey);
+        if (catchValue) {
+            const parseValue = JSON.parse(catchValue);
+            res.json(parseValue);
+            return;
+        }
         const projects = yield prisma.project.findMany();
+        yield redis_1.redis.setex(cacheKey, 3600, JSON.stringify(projects));
         res.json(projects);
     }
     catch (error) {
@@ -45,6 +54,7 @@ const createProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 endDate: new Date(endDate),
             },
         });
+        yield redis_1.redis.del("projects");
         res.status(201).json(projects);
     }
     catch (error) {

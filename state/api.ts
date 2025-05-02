@@ -12,6 +12,7 @@ export enum Priority {
   High = "High",
   Medium = "Medium",
   Low = "Low",
+  BackLog = "Backlog",
 }
 export enum Status {
   ToDo = "To Do",
@@ -19,7 +20,12 @@ export enum Status {
   UnderReview = "Under Review",
   Completed = "Completed",
 }
-
+export interface Team {
+  teamId: number;
+  teamName: string;
+  prodouctOwnerId?: number;
+  projectManagerId?: number;
+}
 export interface User {
   userId?: number;
   username: string;
@@ -30,8 +36,8 @@ export interface User {
 }
 
 export interface Attachment {
-  id?: number;
-  fileUrl: string;
+  id: number;
+  fileURL: string;
   fileName: string;
   taskId: number;
   uploadedById: number;
@@ -47,13 +53,25 @@ export interface Task {
   dueDate?: string;
   points?: number;
   projectId?: number;
-  authorUserId?: string;
-  assignedUserId?: string;
+  authorUserId?: number;
+  assignedUserId?: number;
   author?: User;
   assignee?: User;
   comments?: Comment[];
   attachments: Attachment[];
 }
+export interface SearchResults {
+  tasks?: Task[];
+  projects?: Project[];
+  users?: User[];
+}
+//✅ After you create/update/delete something,
+
+//✅ RTKQ invalidates the cache,
+
+//✅ RTKQ automatically refetches the affected queries,
+
+//✅ Your UI updates by itself 🚀
 // from redux to create http request
 // grab the api request of projects
 // the name doenst need same as the backend fucntion
@@ -61,7 +79,7 @@ export interface Task {
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL }),
   reducerPath: "api",
-  tagTypes: ["Projects", "Tasks"],
+  tagTypes: ["Projects", "Tasks", "Users", "Teams", "Attachments"],
   endpoints: (build) => ({
     getProjects: build.query<Project[], void>({
       query: () => "projects",
@@ -84,6 +102,14 @@ export const api = createApi({
           ? result.map(({ id }) => ({ type: "Tasks" as const, id }))
           : [{ type: "Tasks" as const }], // This specifies that the 'getTask' query provides tags for each task's project
     }),
+    getTaskByUser: build.query<Task[], number>({
+      query: (userId) => `tasks/user/${userId}`,
+      providesTags: (result, error, userId) =>
+        result
+          ? result.map(({ id }) => ({ type: "Tasks", id }))
+          : [{ type: "Tasks", id: userId }], // This specifies that the 'getTaskByUser' query provides tags for each task's project
+    }),
+
     createTask: build.mutation<Task, Partial<Task>>({
       query: (task) => ({
         url: "tasks",
@@ -102,6 +128,33 @@ export const api = createApi({
         { type: "Tasks", id: taskId },
       ], // This invalidates the 'Projects' tag, causing any queries with this tag to re-fetch
     }),
+    search: build.query<SearchResults, string>({
+      query: (query) => `search?query=${query}`,
+    }),
+    getUsers: build.query<User[], void>({
+      query: () => "users",
+      providesTags: ["Users"],
+    }),
+    getTeams: build.query<Team[], void>({
+      query: () => "teams",
+      providesTags: ["Teams"],
+    }),
+    createAttachment: build.mutation<Attachment, Partial<Attachment>>({
+      query: (Attachment) => ({
+        url: "attachments",
+        method: "POST",
+        body: Attachment,
+      }),
+      invalidatesTags: ["Attachments"],
+    }),
+    createUser: build.mutation<User, Partial<User>>({
+      query: (user) => ({
+        url: "users",
+        method: "POST",
+        body: user,
+      }),
+      invalidatesTags: ["Users"],
+    }),
   }),
 });
 
@@ -112,4 +165,10 @@ export const {
   useGetTaskQuery,
   useCreateTaskMutation,
   useUpdateTaskStatusMutation,
+  useSearchQuery,
+  useGetUsersQuery,
+  useGetTeamsQuery,
+  useCreateAttachmentMutation,
+  useCreateUserMutation,
+  useGetTaskByUserQuery,
 } = api;

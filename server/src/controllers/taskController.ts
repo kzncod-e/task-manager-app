@@ -23,6 +23,31 @@ export const getTasks = async (req: Request, res: Response): Promise<void> => {
       .json({ message: "error while retrieving the tasks", error });
   }
 };
+export const getUserTasks = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const { userId } = req.params;
+  try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        OR: [
+          { authorUserId: Number(userId) },
+          { assignedUserId: Number(userId) },
+        ],
+      },
+      include: {
+        author: true,
+        assignee: true,
+      },
+    });
+    res.status(200).json(tasks);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "error while retrieving the user tasks", error });
+  }
+};
 
 export const createTask = async (req: Request, res: Response) => {
   const {
@@ -54,6 +79,8 @@ export const createTask = async (req: Request, res: Response) => {
         assignedUserId,
       },
     });
+    // console.log("New Task Created:", newTask);
+
     res.status(201).json(newTask);
   } catch (error) {
     if (error instanceof Error) {

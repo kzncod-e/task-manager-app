@@ -23,7 +23,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Sidebar = () => {
   const [showProjects, setShowProjects] = useState(true);
@@ -33,6 +33,9 @@ const Sidebar = () => {
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed,
   );
+  useEffect(() => {
+    console.log(projects, "ini projets");
+  }, [projects]);
   const sidebarClassNames = `fixed flex flex-col h-[100%] justify-between shadow-xl transition-all duration-300 h-full z-40 dark:bg-black overflow-y-auto bg-white w-64 ${isSidebarCollapsed ? "w-0 hidden" : "w-64"}`;
   return (
     <div className={sidebarClassNames}>
@@ -70,7 +73,7 @@ const Sidebar = () => {
           <SidebarLink icon={Home} Label="Home" href="/" />
           <SidebarLink icon={Briefcase} Label="Timeline" href="/timeline" />
           <SidebarLink icon={Search} Label="Search" href="/search" />
-          <SidebarLink icon={Settings} Label="Settings" href="/setinggs" />
+          <SidebarLink icon={Settings} Label="Settings" href="/settings" />
           <SidebarLink icon={User} Label="Users" href="/users" />
           <SidebarLink icon={Users} Label="Teams" href="/teams" />
         </nav>
@@ -94,7 +97,7 @@ const Sidebar = () => {
               key={project.id}
               icon={Briefcase}
               Label={project.name}
-              href={`projects/${project.id}`}
+              href={`/projects/${project.id}`}
             />
           ))}
         {/* PRIORITIES */}

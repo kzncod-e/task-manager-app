@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import { redis } from "../lib/redis";
 //mirip kaya model
 const prisma = new PrismaClient();
 export const getProjects = async (
@@ -7,7 +8,15 @@ export const getProjects = async (
   res: Response,
 ): Promise<void> => {
   try {
+    const cacheKey = "projects";
+    const catchValue = await redis.get(cacheKey);
+    if (catchValue) {
+      const parseValue = JSON.parse(catchValue);
+      res.json(parseValue);
+      return;
+    }
     const projects = await prisma.project.findMany();
+    await redis.setex(cacheKey, 3600, JSON.stringify(projects));
     res.json(projects);
   } catch (error) {
     if (error instanceof Error) {
@@ -42,6 +51,7 @@ export const createProject = async (
         endDate: new Date(endDate),
       },
     });
+    await redis.del("projects");
     res.status(201).json(projects);
   } catch (error) {
     if (error instanceof Error) {
