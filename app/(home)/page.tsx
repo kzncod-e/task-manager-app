@@ -24,11 +24,10 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { useAuth } from "@clerk/nextjs";
+
 import { dataGridClassName, dataGridSxStyles } from "@/lib/utils";
 
 const Home = () => {
-  const { userId } = useAuth();
   const {
     data: tasks,
     isError: tasksError,
@@ -51,7 +50,6 @@ const Home = () => {
     },
     {},
   );
-  console.log(userId, "userId");
 
   const taskDistribution = Object.keys(priorityCount).map((key) => ({
     name: key,
