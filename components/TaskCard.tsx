@@ -58,7 +58,7 @@ const TaskCard: React.FC<Props> = ({ task }) => {
             </span>
           </div>
           <Image
-            src={`/${task.attachments[0].fileURL}`}
+            src={`https://pm-s3-bucket1.s3.ap-southeast-2.amazonaws.com/${task.attachments[0].fileURL}`}
             alt={task.attachments[0].fileName}
             width={400}
             height={200}
