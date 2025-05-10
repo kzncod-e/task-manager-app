@@ -10,6 +10,17 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: "error while retrieving users", error });
   }
 };
+export const getUser = async (req: Request, res: Response): Promise<void> => {
+  const { cognitoId } = req.params;
+  try {
+    const user = await prisma.user.findUnique({ where: { cognitoId } });
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "error while retrieving users", error });
+  }
+};
+
 export const postUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
