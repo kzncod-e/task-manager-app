@@ -103,6 +103,8 @@ export const api = createApi({
           }
           const { userSub } = session;
           const { accessToken } = session.tokens ?? {};
+          console.log("accessToken", accessToken);
+
           const userDetailResponse = await fetchWithBQ(`users/${userSub}`);
           const userDetails = userDetailResponse.data as User;
           return { data: { user, userSub, userDetails } };
