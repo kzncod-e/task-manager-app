@@ -3,6 +3,9 @@ import { Priority, Status, useCreateTaskMutation } from "@/state/api";
 import { formatISO } from "date-fns";
 import React, { useState } from "react";
 
+import { ToastContainer, toast } from "react-toastify";
+
+import "react-toastify/dist/ReactToastify.css";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
@@ -10,7 +13,7 @@ type Props = {
 };
 const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
   //when you create an API slice using Redux Toolkit's createApi, it automatically generates hooks for your endpoints. These hooks include isLoading, isFetching, isSuccess, isError
-  const [createTask, { isLoading }] = useCreateTaskMutation();
+  const [createTask, { isLoading, isError }] = useCreateTaskMutation();
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState<Status>(Status.ToDo);
   const [description, setDescription] = useState("");

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
@@ -17,10 +17,11 @@ export const getTasks = async (req: Request, res: Response): Promise<void> => {
       },
     });
     res.status(200).json(tasks);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "error while retrieving the tasks", error });
+  } catch (error: any) {
+    res.status(500).json({
+      message: "error while retrieving the tasks",
+      error: error.message,
+    });
   }
 };
 export const getUserTasks = async (
@@ -42,10 +43,11 @@ export const getUserTasks = async (
       },
     });
     res.status(200).json(tasks);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "error while retrieving the user tasks", error });
+  } catch (error: any) {
+    res.status(500).json({
+      message: "error while retrieving the user tasks",
+      error: error.message,
+    });
   }
 };
 
@@ -112,7 +114,10 @@ export const updateTaskStatus = async (
     if (error instanceof Error) {
       res
         .status(500)
-        .json({ message: "error while updating status tasks", error });
+        .json({
+          message: "error while updating status tasks",
+          error: error.message,
+        });
     }
   }
 };

@@ -29,9 +29,10 @@ const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(200).json(tasks);
     }
     catch (error) {
-        res
-            .status(500)
-            .json({ message: "error while retrieving the tasks", error });
+        res.status(500).json({
+            message: "error while retrieving the tasks",
+            error: error.message,
+        });
     }
 });
 exports.getTasks = getTasks;
@@ -53,9 +54,10 @@ const getUserTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.status(200).json(tasks);
     }
     catch (error) {
-        res
-            .status(500)
-            .json({ message: "error while retrieving the user tasks", error });
+        res.status(500).json({
+            message: "error while retrieving the user tasks",
+            error: error.message,
+        });
     }
 });
 exports.getUserTasks = getUserTasks;
@@ -108,7 +110,10 @@ const updateTaskStatus = (req, res) => __awaiter(void 0, void 0, void 0, functio
         if (error instanceof Error) {
             res
                 .status(500)
-                .json({ message: "error while updating status tasks", error });
+                .json({
+                message: "error while updating status tasks",
+                error: error.message,
+            });
         }
     }
 });
