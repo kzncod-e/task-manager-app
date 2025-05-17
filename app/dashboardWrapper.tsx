@@ -13,7 +13,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const isTaskSuccess = useAppSelector((state) => state.global.isTaskSuccess);
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-  const { data: payload, isLoading } = useGetAuthUserQuery({});
+  const { data: payload, isLoading, isError } = useGetAuthUserQuery({});
   const { userDetails } = payload || {};
 
   useEffect(() => {
@@ -29,11 +29,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     };
   }, [isDarkMode]);
 
-  // Check if userDetails is empty or undefined
-  const isUserDetailsEmpty =
-    !userDetails || Object.keys(userDetails).length === 0;
-
-  if (isLoading || isUserDetailsEmpty) {
+  if (isLoading) {
     // You can customize this loading placeholder as you want
     return (
       <div className="flex min-h-screen items-center justify-center text-gray-700 dark:text-gray-300">

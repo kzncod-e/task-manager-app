@@ -1,5 +1,10 @@
 import Modal from "@/components/Modal";
-import { Priority, Status, useCreateTaskMutation } from "@/state/api";
+import {
+  Priority,
+  Status,
+  useCreateTaskMutation,
+  useGetAuthUserQuery,
+} from "@/state/api";
 import { formatISO } from "date-fns";
 import React, { useState } from "react";
 import { useAppDispatch } from "@/app/redux";
@@ -14,6 +19,9 @@ type Props = {
 const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
   const dispatch = useAppDispatch();
   //when you create an API slice using Redux Toolkit's createApi, it automatically generates hooks for your endpoints. These hooks include isLoading, isFetching, isSuccess, isError
+  const { data: payload } = useGetAuthUserQuery({});
+  const { userDetails } = payload || {};
+  const { userId } = userDetails || {};
   const [createTask, { isLoading, isError }] = useCreateTaskMutation();
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState<Status>(Status.ToDo);
@@ -22,12 +30,12 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
   const [tags, setTags] = useState("");
   const [startDate, setStartDate] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [authorUserId, setAuthorUserId] = useState("");
-  const [assignedUserId, setAssignedUserId] = useState("");
+
+  // const [assignedUserId, setAssignedUserId] = useState("");
   const [projectId, setProjectId] = useState("");
   const handleSubmit = async () => {
     try {
-      if (!title || !authorUserId || !(id !== null || projectId)) return;
+      if (!title || !userId || !(id !== null || projectId)) return;
       const formattedStartDate = formatISO(new Date(startDate), {
         representation: "complete",
       });
@@ -44,20 +52,36 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
         projectId: id !== null ? Number(id) : Number(projectId),
         startDate: formattedStartDate,
         dueDate: formattedEndDate,
-        authorUserId: parseInt(authorUserId),
-        assignedUserId: parseInt(assignedUserId),
+        authorUserId: userId,
+        // assignedUserId: parseInt(assignedUserId),
       });
 
       console.log("Task Created:", response);
       dispatch(setIsTaskSuccess(true));
+      dispatch(setIsTaskError(null));
+      onClose();
+      setTitle("");
+      setDescription("");
+      setStatus(Status.ToDo);
+      setPriority(Priority.BackLog);
+      setTags("");
+      setStartDate("");
+      setDueDate("");
+      setProjectId("");
+      // setAssignedUserId("");
     } catch (error) {
       console.error("Error creating task:", error);
       dispatch(setIsTaskError(true));
+      dispatch(setIsTaskSuccess(null));
+      // Handle error (e.g., show a notification)
+      // You can also set the error state in your component if needed
+      // setError("Failed to create task. Please try again.");
+      // onClose();
     }
   };
 
   const isFormValid = () => {
-    return title && authorUserId;
+    return title;
   };
   const selectStyle =
     "mb-4 block w-full rounded border border-gray-300 px-3 py-2 dark:border-dark-tertiary dark:bg-dark-tertiary dark:text-white dark:focus:outline-none";
@@ -134,20 +158,14 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
         />
-        <input
-          type="text"
-          className={inputStyle}
-          placeholder="Author User ID"
-          value={authorUserId}
-          onChange={(e) => setAuthorUserId(e.target.value)}
-        />
-        <input
+
+        {/* <input
           type="text"
           className={inputStyle}
           value={assignedUserId}
           placeholder="Assigned User ID"
           onChange={(e) => setAssignedUserId(e.target.value)}
-        />
+        /> */}
         {id === null && (
           <input
             type="text"

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
+import { useAppSelector } from "@/app/redux";
 
 // Props type definition
 // - id: The project ID
@@ -40,13 +41,10 @@ const Board = ({ id, setIsModalNewTaskOpen }: Props) => {
   const moveTask = (taskId: number, toStatus: string) => {
     updateTaskStatus({ taskId, status: toStatus });
   };
-
+  const isTaskSuccess = useAppSelector((state) => state.global.isTaskSuccess);
   useEffect(() => {
-    console.log(tasks);
-    if (error) {
-      console.log(error);
-    }
-  }, [tasks]);
+    console.log("task success", isTaskSuccess);
+  }, [isTaskSuccess]);
   // Show loading message if data is still being fetched
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>An Error Occurred While Fetching Tasks </div>;

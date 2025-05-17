@@ -31,9 +31,15 @@ const Projects = ({ params }: Props) => {
         pauseOnHover: true,
         draggable: true,
         theme: "light",
+        onClose: () => {
+          setIsModalNewTaskOpen(false);
+          dispatch(setIsTaskSuccess(null));
+        },
       });
-      dispatch(setIsTaskSuccess(false));
     }
+  }, [isTaskSuccess, dispatch]);
+
+  useEffect(() => {
     if (isTaskError) {
       toast.error("Error creating task", {
         position: "top-right",
@@ -43,10 +49,13 @@ const Projects = ({ params }: Props) => {
         pauseOnHover: true,
         draggable: true,
         theme: "light",
+        onClose: () => {
+          setIsModalNewTaskOpen(false);
+          dispatch(setIsTaskError(null));
+        },
       });
-      dispatch(setIsTaskError(false));
     }
-  }, [isTaskSuccess, isTaskError]);
+  }, [isTaskError, dispatch]);
   return (
     <div>
       {/* modal new Task */}

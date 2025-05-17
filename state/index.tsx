@@ -3,8 +3,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 export interface initialStateTypes {
   isSidebarCollapsed: boolean;
   isDarkMode: boolean;
-  isTaskSuccess: boolean;
-  isTaskError: boolean;
+  isTaskSuccess: boolean | null;
+  isTaskError: boolean | null;
 }
 const initialState: initialStateTypes = {
   isSidebarCollapsed: false,
@@ -19,10 +19,10 @@ export const globalSlice = createSlice({
     setIsSidebarCollapsed: (state, actions: PayloadAction<boolean>) => {
       state.isSidebarCollapsed = actions.payload;
     },
-    setIsTaskSuccess: (state, actions: PayloadAction<boolean>) => {
+    setIsTaskSuccess: (state, actions: PayloadAction<boolean | null>) => {
       state.isTaskSuccess = actions.payload;
     },
-    setIsTaskError: (state, actions: PayloadAction<boolean>) => {
+    setIsTaskError: (state, actions: PayloadAction<boolean | null>) => {
       state.isTaskError = actions.payload;
     },
     setIsDarkMode: (state, actions: PayloadAction<boolean>) => {
