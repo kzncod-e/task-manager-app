@@ -12,18 +12,46 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import ModalNewProject from "./ModalNewProject";
+import { ToastContainer, toast } from "react-toastify";
 type Props = {
   activeTab: string;
   setActiveTab: (tabName: string) => void;
 };
 const ProjectHeader = ({ activeTab, setActiveTab }: Props) => {
   const [isModalNewProjectOpen, setIsModalNewProjectOpen] = useState(false);
-  useEffect(() => {
-    console.log(activeTab, "ini active tab");
-  }, [activeTab]);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
+  if (isSuccess) {
+    toast.success("Project created successfully", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "light",
+    });
+    setIsSuccess(false);
+  }
+  if (isError) {
+    toast.error("Error creating project", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "light",
+    });
+    setIsError(false);
+  }
   return (
     <div className="px-4 lg:px-6">
       <ModalNewProject
+        setIsError={setIsError}
+        setIsSuccess={setIsSuccess}
+        isSuccess={isSuccess}
+        isError={isError}
         isOpen={isModalNewProjectOpen}
         onClose={() => setIsModalNewProjectOpen(false)}
       />
@@ -87,6 +115,18 @@ const ProjectHeader = ({ activeTab, setActiveTab }: Props) => {
           </div>
         </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 };

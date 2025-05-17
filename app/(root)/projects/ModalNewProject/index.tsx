@@ -1,34 +1,59 @@
+"use client";
 import Modal from "@/components/Modal";
 import { useCreateProjectMutation } from "@/state/api";
 import { formatISO } from "date-fns";
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 type Props = {
+  setIsSuccess?: (isSuccess: boolean) => void;
+  setIsError?: (isError: boolean) => void;
+  isSuccess?: boolean;
+  isError?: boolean;
   isOpen: boolean;
   onClose: () => void;
 };
-const ModalNewProject = ({ isOpen, onClose }: Props) => {
+const ModalNewProject = ({
+  isOpen,
+  onClose,
+  isSuccess,
+  isError,
+  setIsError,
+  setIsSuccess,
+}: Props) => {
   //when you create an API slice using Redux Toolkit's createApi, it automatically generates hooks for your endpoints. These hooks include isLoading, isFetching, isSuccess, isError
   const [createProject, { isLoading }] = useCreateProjectMutation();
   const [projectName, setProjectName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [description, setDescription] = useState("");
   const [endDate, setEndDate] = useState("");
-  const handleSubmit = async () => {
-    if (!projectName || !startDate) return;
-    const formattedStartDate = formatISO(new Date(startDate), {
-      representation: "complete",
-    });
-    const formattedEndDate = formatISO(new Date(endDate), {
-      representation: "complete",
-    });
-    await createProject({
-      name: projectName,
-      description,
-      startDate: formattedStartDate,
-      endDate: formattedEndDate,
-    });
+  const resetForm = () => {
+    setProjectName("");
+    setStartDate("");
+    setDescription("");
+    setEndDate("");
   };
+
+  const handleSubmit = async () => {
+    if (!projectName || !startDate || !description || !endDate) return;
+    const formattedStartDate = formatISO(new Date(startDate));
+    const formattedEndDate = formatISO(new Date(endDate));
+
+    try {
+      await createProject({
+        name: projectName,
+        description,
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+      }).unwrap(); // important!
+
+      if (setIsSuccess) setIsSuccess(true);
+      resetForm(); // a helper to clear state
+      onClose();
+    } catch (err) {
+      if (setIsError) setIsError(true);
+    }
+  };
+
   const isFormValid = () => {
     return projectName && startDate && description && endDate;
   };

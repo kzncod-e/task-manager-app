@@ -1,15 +1,13 @@
+"use client";
 import Header from "@/components/Header";
+import { useGetAuthUserQuery } from "@/state/api";
 import React from "react";
+import Image from "next/image";
+const Settings = () => {
+  const { data: currentUser } = useGetAuthUserQuery({});
 
-type Props = {};
+  console.log(currentUser);
 
-const Settings = (props: Props) => {
-  const userSettings = {
-    username: "johndoe",
-    email: "john.doe@example.com",
-    teamName: "Development Team",
-    roleName: "Developer",
-  };
   const labelStyles = "block text-sm font-medium dark:text-white";
   const textStyles =
     "mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 dark:text-white ";
@@ -21,26 +19,34 @@ const Settings = (props: Props) => {
           <label htmlFor="" className={labelStyles}>
             Username
           </label>
-          <div className={textStyles}>{userSettings.username}</div>
+          <div className={textStyles}>
+            {" "}
+            {currentUser && currentUser?.userDetails?.username}
+          </div>
         </div>
         <div>
           <label htmlFor="" className={labelStyles}>
-            Email
+            Profile picture
           </label>
-          <div className={textStyles}>{userSettings.email}</div>
+          <div>
+            <Image
+              width={100}
+              height={100}
+              src={`https://pm-s3-bucket1.s3.ap-southeast-2.amazonaws.com/${currentUser?.userDetails?.profilePictureUrl}`}
+              alt="Profile"
+              className="mt-4 h-16 w-16 rounded-full"
+            />
+          </div>
         </div>
         <div>
           <label htmlFor="" className={labelStyles}>
             Team
           </label>
-          <div className={textStyles}>{userSettings.teamName}</div>
+          <div className={textStyles}>
+            Team {currentUser && currentUser?.userDetails?.teamId}
+          </div>
         </div>
-        <div>
-          <label htmlFor="" className={labelStyles}>
-            Roles
-          </label>
-          <div className={textStyles}>{userSettings.roleName}</div>
-        </div>
+        <div></div>
       </div>
     </div>
   );

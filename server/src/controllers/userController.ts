@@ -38,7 +38,12 @@ export const postUsers = async (req: Request, res: Response): Promise<void> => {
       },
     });
     res.status(200).json({ message: "User created successfully", newUsers });
-  } catch (error) {
-    res.status(500).json({ message: "error while retrieving users", error });
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({
+        message: "error while creating new User ",
+        error: error.message,
+      });
   }
 };

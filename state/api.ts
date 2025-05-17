@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
 
+// ======================= Types =======================
 export interface Project {
   id: number;
   name: string;
@@ -8,6 +9,7 @@ export interface Project {
   startDate: string;
   endDate: string;
 }
+
 export enum Priority {
   Urgent = "Urgent",
   High = "High",
@@ -15,18 +17,21 @@ export enum Priority {
   Low = "Low",
   BackLog = "Backlog",
 }
+
 export enum Status {
   ToDo = "To Do",
   WorkInProgress = "Work In Progress",
   UnderReview = "Under Review",
   Completed = "Completed",
 }
+
 export interface Team {
   teamId: number;
   teamName: string;
   prodouctOwnerId?: number;
   projectManagerId?: number;
 }
+
 export interface User {
   userId?: number;
   username: string;
@@ -43,6 +48,7 @@ export interface Attachment {
   taskId: number;
   uploadedById: number;
 }
+
 export interface Task {
   id: number;
   title: string;
@@ -61,33 +67,33 @@ export interface Task {
   comments?: Comment[];
   attachments: Attachment[];
 }
+
 export interface SearchResults {
   tasks?: Task[];
   projects?: Project[];
   users?: User[];
 }
-//✅ After you create/update/delete something,
 
-//✅ RTKQ invalidates the cache,
+// =================== Token Setup ===================
+// Store token in memory
+let token: string | null = null;
 
-//✅ RTKQ automatically refetches the affected queries,
+const fetchToken = async () => {
+  if (!token) {
+    const session = await fetchAuthSession();
+    token = session?.tokens?.accessToken?.toString() ?? null;
+  }
+  return token;
+};
 
-//✅ Your UI updates by itself 🚀
-// from redux to create http request
-// grab the api request of projects
-// the name doenst need same as the backend fucntion
-//this will give you updated data of project
+// ==================== API Setup =====================
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-    // to make access to api gateway
-    prepareHeaders: async (headers) => {
-      const session = await fetchAuthSession();
-      const accessToken = session?.tokens ?? {};
-      if (accessToken) {
-        headers.set("Authorization", `Bearer ${accessToken}`);
+    prepareHeaders: (headers) => {
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
       }
-
       return headers;
     },
   }),
@@ -99,10 +105,9 @@ export const api = createApi({
         try {
           const user = await getCurrentUser();
           const session = await fetchAuthSession();
-          if (!session) {
-            throw new Error("Session not found");
-          }
           const { userSub } = session;
+          console.log("userSub", userSub);
+
           const { accessToken } = session.tokens ?? {};
           console.log("accessToken", accessToken);
 
@@ -114,33 +119,35 @@ export const api = createApi({
         }
       },
     }),
+
     getProjects: build.query<Project[], void>({
       query: () => "projects",
-      providesTags: ["Projects"], // This specifies that the 'getProjects' query provides the 'Projects' tag
+      providesTags: ["Projects"],
     }),
+
     createProject: build.mutation<Project, Partial<Project>>({
       query: (project) => ({
         url: "projects",
         method: "POST",
         body: project,
       }),
-      invalidatesTags: ["Projects"], // This invalidates the 'Projects' tag, causing any queries with this tag to re-fetch
+      invalidatesTags: ["Projects"],
     }),
+
     getTask: build.query<Task[], { projectId: number }>({
       query: ({ projectId }) => `tasks?projectId=${projectId}`,
       providesTags: (result) =>
-        //When a task is updated, RTK Query can ensure only the data for that specific task is re-fetched, not the entire task list.
-        //is creating a tag object that RTK Query uses for caching, invalidation, and re-fetching purposes.
         result
           ? result.map(({ id }) => ({ type: "Tasks" as const, id }))
-          : [{ type: "Tasks" as const }], // This specifies that the 'getTask' query provides tags for each task's project
+          : [{ type: "Tasks" as const }],
     }),
+
     getTaskByUser: build.query<Task[], number>({
       query: (userId) => `tasks/user/${userId}`,
       providesTags: (result, error, userId) =>
         result
           ? result.map(({ id }) => ({ type: "Tasks", id }))
-          : [{ type: "Tasks", id: userId }], // This specifies that the 'getTaskByUser' query provides tags for each task's project
+          : [{ type: "Tasks", id: userId }],
     }),
 
     createTask: build.mutation<Task, Partial<Task>>({
@@ -151,6 +158,7 @@ export const api = createApi({
       }),
       invalidatesTags: ["Tasks"],
     }),
+
     updateTaskStatus: build.mutation<Task, { taskId: number; status: string }>({
       query: ({ taskId, status }) => ({
         url: `tasks/${taskId}/status`,
@@ -159,27 +167,32 @@ export const api = createApi({
       }),
       invalidatesTags: (result, error, { taskId }) => [
         { type: "Tasks", id: taskId },
-      ], // This invalidates the 'Projects' tag, causing any queries with this tag to re-fetch
+      ],
     }),
+
     search: build.query<SearchResults, string>({
       query: (query) => `search?query=${query}`,
     }),
+
     getUsers: build.query<User[], void>({
       query: () => "users",
       providesTags: ["Users"],
     }),
+
     getTeams: build.query<Team[], void>({
       query: () => "teams",
       providesTags: ["Teams"],
     }),
+
     createAttachment: build.mutation<Attachment, Partial<Attachment>>({
-      query: (Attachment) => ({
+      query: (attachment) => ({
         url: "attachments",
         method: "POST",
-        body: Attachment,
+        body: attachment,
       }),
       invalidatesTags: ["Attachments"],
     }),
+
     createUser: build.mutation<User, Partial<User>>({
       query: (user) => ({
         url: "users",
@@ -191,7 +204,7 @@ export const api = createApi({
   }),
 });
 
-// Export hooks
+// ==================== Export Hooks ====================
 export const {
   useGetProjectsQuery,
   useCreateProjectMutation,
@@ -206,3 +219,9 @@ export const {
   useGetTaskByUserQuery,
   useGetAuthUserQuery,
 } = api;
+
+// ==================== Pre-fetch token before app loads ====================
+// Call this function at app startup (e.g., in _app.tsx or a layout effect)
+export const initializeApiAuth = async () => {
+  await fetchToken();
+};

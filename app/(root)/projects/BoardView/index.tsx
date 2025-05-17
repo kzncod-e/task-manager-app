@@ -43,6 +43,9 @@ const Board = ({ id, setIsModalNewTaskOpen }: Props) => {
 
   useEffect(() => {
     console.log(tasks);
+    if (error) {
+      console.log(error);
+    }
   }, [tasks]);
   // Show loading message if data is still being fetched
   if (isLoading) return <div>Loading...</div>;

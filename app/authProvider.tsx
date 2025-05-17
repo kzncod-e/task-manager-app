@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Authenticator, Placeholder } from "@aws-amplify/ui-react";
 import { Amplify } from "aws-amplify";
 import "@aws-amplify/ui-react/styles.css";
-
+import { initializeApiAuth } from "@/state/api";
 Amplify.configure({
   Auth: {
     Cognito: {
@@ -60,6 +60,9 @@ const formFields = {
   },
 };
 const AuthProvider = ({ children }) => {
+  useEffect(() => {
+    initializeApiAuth();
+  }, []);
   return (
     <div className="mt-5">
       <Authenticator formFields={formFields}>

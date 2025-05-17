@@ -4,11 +4,18 @@ import Sidebar from "@/components/Sidebar";
 import React, { ReactNode, useEffect } from "react";
 import StoreProvider, { useAppSelector } from "./redux";
 import AuthProvider from "./authProvider";
+import { useGetAuthUserQuery } from "@/state/api";
+
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed,
   );
+  const isTaskSuccess = useAppSelector((state) => state.global.isTaskSuccess);
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
+
+  const { data: payload, isLoading } = useGetAuthUserQuery({});
+  const { userDetails } = payload || {};
+
   useEffect(() => {
     const className = "dark";
     const element = document.body;
@@ -21,8 +28,22 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
       element.classList.remove(className);
     };
   }, [isDarkMode]);
+
+  // Check if userDetails is empty or undefined
+  const isUserDetailsEmpty =
+    !userDetails || Object.keys(userDetails).length === 0;
+
+  if (isLoading || isUserDetailsEmpty) {
+    // You can customize this loading placeholder as you want
+    return (
+      <div className="flex min-h-screen items-center justify-center text-gray-700 dark:text-gray-300">
+        Loading user data...
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen w-full bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen w-full bg-gray-50 text-gray-900 dark:bg-dark-bg dark:text-gray-100">
       <Sidebar />
       <main
         className={`flex w-full flex-col bg-gray-50 ${isSidebarCollapsed ? "" : "md:pl-64"} dark:bg-dark-bg`}
@@ -33,6 +54,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     </div>
   );
 };
+
 const DashboardWrapper = ({ children }: { children: ReactNode }) => {
   return (
     <StoreProvider>
@@ -42,4 +64,5 @@ const DashboardWrapper = ({ children }: { children: ReactNode }) => {
     </StoreProvider>
   );
 };
+
 export default DashboardWrapper;
