@@ -15,7 +15,17 @@ import attachmentRoute from "./routes/attachmentRoute";
 // CONFIGURATION
 dotenv.config();
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://master.d2y7mbyffzmhmr.amplifyapp.com/",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
+);
+
+app.options("*", cors());
+
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy());
 app.use(express.json());

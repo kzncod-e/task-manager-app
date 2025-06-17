@@ -19,7 +19,13 @@ const attachmentRoute_1 = __importDefault(require("./routes/attachmentRoute"));
 // CONFIGURATION
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: "https://master.d2y7mbyffzmhmr.amplifyapp.com/",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+}));
+app.options("*", (0, cors_1.default)());
 app.use((0, helmet_1.default)());
 app.use(helmet_1.default.crossOriginResourcePolicy());
 app.use(express_1.default.json());
